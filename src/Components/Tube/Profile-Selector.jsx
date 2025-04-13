@@ -4,6 +4,7 @@ import { decodeToken, isAdmin } from '../../utilities/authUtils';
 import "./TubeKids.css";
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { GraphQLClient, gql } from 'graphql-request';
 
 // Importaciones de imágenes (usando placeholders para evitar errores)
 import icon1 from "../../assets/icon1.jpg";
@@ -15,6 +16,18 @@ import icon6 from "../../assets/icon6.jpg";
 import icon from "../../assets/iconpf.jpg";
 
 const API_URL = "http://localhost:5000/api/restricted-users";
+
+const GET_RESTRICTED_USERS = gql`
+  query {
+    getRestrictedUsers {
+      _id
+      name
+      pin
+      avatar
+    }
+  }
+`;
+
 
 const TubeKids = () => {
   const navigate = useNavigate();
@@ -30,18 +43,19 @@ const TubeKids = () => {
   const userPin = user?.pin;
 
   const fetchProfiles = async () => {
-    const token = localStorage.getItem('token');  // Ensure the token is being saved in localStorage upon login
-    console.log(`Token being sent: ${token}`); // This will log the token you're sending
-    const headers = {
-      Authorization: `Bearer ${token}`
-    };
-
+    const token = localStorage.getItem('token');
+  
+    const client = new GraphQLClient('http://localhost:4000/graphql', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
     try {
-      const response = await axios.get(API_URL, { headers });
-      console.log('Response Data:', response.data); // This logs the response from the server
-      setProfiles(response.data);
+      const data = await client.request(GET_RESTRICTED_USERS);
+      setProfiles(data.getRestrictedUsers);
     } catch (error) {
-      const errorMessage = error.response ? error.response.data.message : error.message;
+      const errorMessage = error.response?.errors?.[0]?.message || error.message;
       console.error("Error fetching profiles:", errorMessage);
       Swal.fire('Error!', errorMessage, 'error');
     }
