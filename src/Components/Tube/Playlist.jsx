@@ -1,8 +1,45 @@
 "use client"
-
+import { GraphQLClient, gql } from 'graphql-request';
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import "./TubeKids.css"
+
+const GET_PLAYLISTS_FOR_RESTRICTED_USER = gql`
+  query ($profileId: ID!) {
+    getPlaylistsForRestrictedUser(profileId: $profileId) {
+      _id
+      name
+      description
+      assignedProfiles
+      videos
+    }
+  }
+`;
+
+const GET_VIDEOS_FOR_RESTRICTED_USER = gql`
+  query ($profileId: ID!) {
+    getVideosForRestrictedUser(profileId: $profileId) {
+      _id
+      name
+      url
+      description
+      thumbnail
+    }
+  }
+`;
+
+const SEARCH_VIDEOS_FOR_RESTRICTED_USER = gql`
+  query ($profileId: ID!, $searchTerm: String!) {
+    searchVideosForRestrictedUser(profileId: $profileId, searchTerm: $searchTerm) {
+      _id
+      name
+      url
+      description
+      thumbnail
+    }
+  }
+`;
+
 
 const Playlist = () => {
   const navigate = useNavigate()
@@ -18,74 +55,73 @@ const Playlist = () => {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false)
 
   // Fetch playlists and filter by profile ID
-  useEffect(() => {
-    const fetchPlaylists = async () => {
+   useEffect(() => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("token")
-        const response = await fetch("http://localhost:5000/api/playlists", {
+        const client = new GraphQLClient("http://localhost:4000/graphql", {
           headers: { Authorization: `Bearer ${token}` },
         })
 
-        if (!response.ok) throw new Error("Failed to fetch playlists")
-        const data = await response.json()
+        const playlistsData = await client.request(GET_PLAYLISTS_FOR_RESTRICTED_USER, {
+          profileId: profile._id || profile.id,
+        })
 
-        // Filtrar por el perfil actual
-        const filtered = data.filter((playlist) => playlist.assignedProfiles.includes(profile.id || profile._id))
-        setPlaylists(filtered)
+        const videosData = await client.request(GET_VIDEOS_FOR_RESTRICTED_USER, {
+          profileId: profile._id || profile.id,
+        })
+
+        setPlaylists(playlistsData.getPlaylistsForRestrictedUser)
+        setVideos(videosData.getVideosForRestrictedUser)
       } catch (error) {
-        console.error("Error fetching playlists:", error)
+        console.error("GraphQL fetch error:", error)
       }
     }
 
-    fetchPlaylists()
+    if (profile) fetchData()
   }, [profile])
-
-  // Fetch videos relacionados
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const token = localStorage.getItem("token")
-        const response = await fetch("http://localhost:5000/api/videos", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
-        if (!response.ok) throw new Error("Failed to fetch videos")
-        const data = await response.json()
-        setVideos(data)
-      } catch (error) {
-        console.error("Error fetching videos:", error)
-      }
-    }
-
-    fetchVideos()
-  }, [])
 
   // Filtrar videos basados en el término de búsqueda
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    const client = new GraphQLClient("http://localhost:4000/graphql", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  
+    const fetchSearchResults = async () => {
+      try {
+        const data = await client.request(SEARCH_VIDEOS_FOR_RESTRICTED_USER, {
+          profileId: profile._id || profile.id,
+          searchTerm: searchTerm.trim()
+        });
+        setFilteredVideos(data.searchVideosForRestrictedUser);
+      } catch (error) {
+        console.error("Search query error:", error);
+        setFilteredVideos([]);
+      }
+    };
+  
     if (selectedPlaylist) {
-      const playlistVideos = videos.filter((video) => selectedPlaylist.videos.includes(video._id))
-
+      const playlistVideos = videos.filter((video) =>
+        selectedPlaylist.videos.includes(video._id)
+      );
+  
       if (searchTerm.trim() === "") {
-        setFilteredVideos(playlistVideos)
+        setFilteredVideos(playlistVideos);
       } else {
         const filtered = playlistVideos.filter(
           (video) =>
             video.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            video.description.toLowerCase().includes(searchTerm.toLowerCase()),
-        )
-        setFilteredVideos(filtered)
+            video.description.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredVideos(filtered);
       }
     } else if (searchTerm.trim() !== "") {
-      const filtered = videos.filter(
-        (video) =>
-          video.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          video.description.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-      setFilteredVideos(filtered)
+      fetchSearchResults(); // <-- llamada al backend con GraphQL
     } else {
-      setFilteredVideos([])
+      setFilteredVideos([]);
     }
-  }, [selectedPlaylist, videos, searchTerm])
+  }, [selectedPlaylist, searchTerm, videos, profile]);
 
   const handleSelectPlaylist = (playlist) => {
     setSelectedPlaylist(playlist)

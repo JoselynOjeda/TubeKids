@@ -23,9 +23,11 @@ const GET_RESTRICTED_USERS = gql`
       _id
       name
       avatar
+      pin
     }
   }
 `;
+
 
 
 const TubeKids = () => {
@@ -163,21 +165,26 @@ const TubeKids = () => {
       alert("Please ensure all fields are filled correctly.");
       return;
     }
-
+  
     const token = localStorage.getItem('token');
     const headers = {
       Authorization: `Bearer ${token}`
     };
-
+  
     const updatedProfileData = {
       name: newProfile.name,
       pin: newProfile.pin,
-      avatar: selectedAvatar, // <- Aquí está el cambio
+      avatar: selectedAvatar,
     };
-
+  
     try {
-      const response = await axios.put(`${API_URL}/${currentProfile._id}`, updatedProfileData, { headers });
-      setProfiles(profiles.map(profile => profile._id === currentProfile._id ? response.data : profile));
+      // Actualiza el perfil
+      await axios.put(`${API_URL}/${currentProfile._id}`, updatedProfileData, { headers });
+  
+      // 🔄 Refresca los perfiles desde el backend
+      await fetchProfiles();
+  
+      // Limpia el estado
       setCurrentProfile(null);
       setNewProfile({ name: "", pin: "", avatar: "" });
       setSelectedAvatar("");
