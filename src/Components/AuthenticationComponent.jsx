@@ -4,6 +4,19 @@ import { FaEnvelope, FaLock, FaUser, FaPhone, FaIdBadge, FaGlobe, FaCalendarAlt 
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
+import { GraphQLClient, gql } from 'graphql-request';
+
+const client = new GraphQLClient('http://localhost:4000/graphql');
+const GET_COUNTRIES_QUERY = gql`
+  query {
+    getCountries {
+      _id
+      name
+      code
+    }
+  }
+`;
+
 const API_URL = "http://localhost:5000/api/users/";
 
 const initialState = {
@@ -27,10 +40,16 @@ const AuthenticationComponent = () => {
     const [countries, setCountries] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/countries')
-            .then(res => res.json())
-            .then(data => setCountries(data))
-            .catch(err => console.error("Error fetching countries:", err));
+        const fetchCountries = async () => {
+            try {
+                const data = await client.request(GET_COUNTRIES_QUERY);
+                setCountries(data.getCountries);
+            } catch (error) {
+                console.error("Error fetching countries:", error);
+            }
+        };
+
+        fetchCountries();
     }, []);
 
     const handleChange = (e, isSignIn = false) => {
