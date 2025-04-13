@@ -22,7 +22,6 @@ const GET_RESTRICTED_USERS = gql`
     getRestrictedUsers {
       _id
       name
-      pin
       avatar
     }
   }

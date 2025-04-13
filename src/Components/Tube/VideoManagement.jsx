@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { decodeToken, isAdmin } from '../../utilities/authUtils';
 import icon from "../../assets/iconpf.jpg";
 import "./TubeKids.css";
+import { GraphQLClient, gql } from 'graphql-request';
+
 
 const VideoManagement = () => {
   const navigate = useNavigate();
@@ -22,6 +24,41 @@ const VideoManagement = () => {
   const [currentView, setCurrentView] = useState("dashboard"); // dashboard, videoList, playlistList, addVideo, addPlaylist, editVideo, editPlaylist, playlistDetail
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const GET_RESTRICTED_USERS = gql`
+  query {
+    getRestrictedUsers {
+      _id
+      name
+      avatar
+    }
+  }
+`;
+
+const GET_USER_VIDEOS = gql`
+  query {
+    getUserVideos {
+      _id
+      name
+      url
+      description
+      thumbnail
+    }
+  }
+`;
+
+const GET_USER_PLAYLISTS = gql`
+  query {
+    getUserPlaylists {
+      _id
+      name
+      description
+      assignedProfiles
+      videos
+    }
+  }
+`;
+
 
   // Estados para formularios
   const [videoForm, setVideoForm] = useState({
@@ -49,54 +86,50 @@ const VideoManagement = () => {
     const fetchRestrictedProfiles = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/api/restricted-users", {
-          headers: { Authorization: `Bearer ${token}` },
+        const client = new GraphQLClient("http://localhost:4000/graphql", {
+          headers: { Authorization: `Bearer ${token}` }
         });
-        if (!response.ok) throw new Error("Failed to fetch restricted profiles");
-        const data = await response.json();
-        const formattedProfiles = data.map(profile => ({
+    
+        const data = await client.request(GET_RESTRICTED_USERS);
+    
+        const formattedProfiles = data.getRestrictedUsers.map(profile => ({
           id: profile._id,
           name: profile.name,
           avatar: profile.avatar || `https://via.placeholder.com/60/CCCCCC/FFFFFF?text=${profile.name?.charAt(0).toUpperCase() || 'P'}`
         }));
+    
         setProfiles(formattedProfiles);
       } catch (error) {
-        console.error("Error loading profiles:", error);
+        const errorMessage = error.response?.errors?.[0]?.message || error.message;
+        console.error("Error loading restricted profiles:", errorMessage);
       }
     };
 
     const fetchUserVideos = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/api/videos", {
+        const client = new GraphQLClient("http://localhost:4000/graphql", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error("Failed to fetch videos");
-        const data = await response.json();
     
-        // Filtrar por usuario logueado
-        const filtered = data.filter(video => video.userId === user.id);
-        setVideos(filtered);
+        const data = await client.request(GET_USER_VIDEOS);
+        setVideos(data.getUserVideos);
       } catch (error) {
-        console.error("Error fetching videos:", error);
+        console.error("Error fetching videos:", error.message);
       }
     };
     
-
     const fetchUserPlaylists = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/api/playlists", {
+        const client = new GraphQLClient("http://localhost:4000/graphql", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error("Failed to fetch playlists");
-        const data = await response.json();
     
-        // 🔐 Filtrar playlists por usuario logueado
-        const filtered = data.filter(playlist => playlist.userId === user.id);
-        setPlaylists(filtered);
+        const data = await client.request(GET_USER_PLAYLISTS);
+        setPlaylists(data.getUserPlaylists);
       } catch (error) {
-        console.error("Error fetching playlists:", error);
+        console.error("Error fetching playlists:", error.message);
       }
     };
 
