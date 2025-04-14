@@ -88,11 +88,13 @@ const AuthenticationComponent = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
+
             const data = await response.json();
+
             if (response.ok) {
-                Swal.fire('Success!', 'Your registration is complete!', 'success');
+                Swal.fire('Success!', data.message || 'Please check your email to verify your account.', 'success');
                 resetForm();
-                toggle(true);
+                toggle(true); // Cambia a pantalla de login
             } else {
                 throw new Error(data.message || 'Failed to register');
             }
@@ -100,6 +102,7 @@ const AuthenticationComponent = () => {
             Swal.fire('Error!', error.message, 'error');
         }
     };
+
 
     const handleLogin = async () => {
         if (!signInData.email || !signInData.password) {
@@ -117,6 +120,8 @@ const AuthenticationComponent = () => {
                 Swal.fire('Success!', 'You have successfully logged in.', 'success');
                 localStorage.setItem('token', data.token);
                 navigate('/profile-selector');
+            } else if (response.status === 403 && data.message.includes("verify")) {
+                Swal.fire('Verification Required', data.message, 'warning');
             } else {
                 throw new Error(data.message || 'Failed to log in');
             }
