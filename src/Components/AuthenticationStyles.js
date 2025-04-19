@@ -20,14 +20,14 @@ export const Container = styled.div`
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   position: relative;
   overflow: hidden;
-  width: 1000px; // Increased width for more space
+  width: 1000px; // Keeping a reasonable width
   max-width: 100%; // Ensures it does not exceed the width of the viewport
-  min-height: 485px; // Increased height to accommodate larger form elements
+  min-height: 600px; // Increased height to fit all content
   display: flex;
   justify-content: center;
   align-items: center; // Center items vertically and horizontally
   padding: 50px; // Increased padding for more internal space
-`;
+`
 
 export const SignUpContainer = styled.div`
  position: absolute;
@@ -96,6 +96,8 @@ export const SignUpForm = styled.form`
   width: 100%;  // Full width of the container
   max-width: 800px;  // Maximum width of the form
   margin: auto;  // Center the form within the Container
+  max-height: 650px; // Set a maximum height
+  overflow-y: auto; // Add scroll if content exceeds height
 `;
 
 export const SignInForm = styled.form`

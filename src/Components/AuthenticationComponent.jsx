@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import styled, { keyframes } from "styled-components" // Añadido import de styled
 import * as Components from "./AuthenticationStyles"
-import { FaEnvelope, FaLock, FaUser, FaIdBadge, FaGlobe, FaCalendarAlt, FaTimes } from "react-icons/fa"
+import { FaEnvelope, FaLock, FaUser, FaIdBadge, FaGlobe, FaCalendarAlt, FaTimes, FaGoogle } from "react-icons/fa"
 import Swal from "sweetalert2"
 import { useNavigate } from "react-router-dom"
 
@@ -86,6 +86,60 @@ const PhoneCodeField = styled.div`
 
 const PhoneNumberField = styled(Components.Input)`
   flex: 1;
+`
+
+// Estilo para el botón de Google
+const GoogleButton = styled.button`
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #fff;
+  color: #757575;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 70%;
+  margin: 10px auto;
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #f5f5f5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  svg {
+    color: #4285F4;
+    font-size: 20px;
+  }
+`
+
+const OrDivider = styled.div`
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  color: #757575;
+  font-size: 14px;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+  }
+
+  &::before {
+    margin-right: 10px;
+  }
+
+  &::after {
+    margin-left: 10px;
+  }
 `
 
 const client = new GraphQLClient("http://localhost:4000/graphql")
@@ -210,8 +264,54 @@ const AuthenticationComponent = () => {
   // Estado para controlar la visibilidad del popup de verificación
   const [showVerificationPopup, setShowVerificationPopup] = useState(false)
 
-  // Add this ref to track the timer without causing rerenders
+
   const timerRef = useRef(60)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const verifySource = params.get("verify");
+    const token = params.get("token");
+    const userId = params.get("userId");
+  
+    if (verifySource === "google") {
+      Swal.fire({
+        icon: "info",
+        title: "Email Verification Required",
+        text: "Please check your email and verify your account before signing in.",
+        confirmButtonColor: "#ff4b2b"
+      }).then(() => {
+        toggle(true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      });
+      return;
+    }
+  
+    // ✅ FLUJO Google Login + código SMS
+    if (token && userId) {
+      console.log("✅ Capturado desde URL:", { token, userId });
+      setPendingUserId(userId);               // <-- Este es CLAVE para verificar luego
+      setIsAwaitingCode(true);
+      setShowVerificationPopup(true);
+      setResendTimer(60);
+      setCanResend(false);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+  
+    // ✅ Solo token (sin userId) → Login directo
+    if (token) {
+      Swal.fire({
+        icon: "success",
+        title: "Login successful!",
+        text: "Welcome back!",
+        confirmButtonColor: "#ff4b2b"
+      }).then(() => {
+        localStorage.setItem("token", token);
+        navigate("/profile-selector");
+      });
+    }
+  }, []);
+  
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -226,20 +326,18 @@ const AuthenticationComponent = () => {
     fetchCountries()
   }, [])
 
-  // Replace the existing timer useEffect with this one
   useEffect(() => {
     if (!isAwaitingCode || timerRef.current <= 0) return
 
     const timerId = setInterval(() => {
       timerRef.current -= 1
-      // Only update the state occasionally to show in UI, not every second
       setResendTimer(timerRef.current)
     }, 1000)
 
     return () => clearInterval(timerId)
   }, [isAwaitingCode])
 
-  // Update the auto-resend effect to use the ref
+
   useEffect(() => {
     if (timerRef.current === 0 && isAwaitingCode && !canResend && !hasAutoResent.current) {
       hasAutoResent.current = true
@@ -292,7 +390,7 @@ const AuthenticationComponent = () => {
             country: value,
             phoneCode: code,
             phoneNumber: "",
-            phone: code
+            phone: code,
           }
         })
       } else if (name === "phoneNumber") {
@@ -301,7 +399,7 @@ const AuthenticationComponent = () => {
           return {
             ...prev,
             phoneNumber: value,
-            phone: combinedPhone
+            phone: combinedPhone,
           }
         })
       } else {
@@ -309,7 +407,6 @@ const AuthenticationComponent = () => {
       }
     }
   }
-  
 
   const resetForm = () => {
     setFormData(initialState)
@@ -405,6 +502,11 @@ const AuthenticationComponent = () => {
     isSignIn ? handleLogin() : handleSignup()
   }
 
+  // Google Sign-In handler
+  const handleGoogleSignIn = () => {
+    window.location.href = "http://localhost:5000/api/users/google"
+  }
+
   // Verification code handlers
   const handleCodeChange = (e, index) => {
     const value = e.target.value
@@ -464,42 +566,47 @@ const AuthenticationComponent = () => {
   }
 
   const verifyCode = async () => {
-    const code = verificationCode.join("")
+    const code = verificationCode.join("");
+  
     if (code.length !== 6) {
-      setVerificationError("Please enter all 6 digits")
-      return
+      setVerificationError("Please enter all 6 digits");
+      return;
     }
-
-    setIsVerifying(true)
-    setVerificationError("")
-    setVerificationSuccess("")
-
+  
+    setIsVerifying(true);
+    setVerificationError("");
+    setVerificationSuccess("");
+  
     try {
-      const response = await fetch(`${API_URL}verify-sms`, {
+      console.log("📤 Enviando verificación con:", { userId: pendingUserId, code });
+  
+      const response = await fetch("http://localhost:5000/api/users/verify-sms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: pendingUserId, code }),
-      })
-
-      const data = await response.json()
-
+      });
+  
+      const data = await response.json();
+  
       if (response.ok) {
-        setVerificationSuccess("Verification successful!")
+        setVerificationSuccess("Verification successful!");
         setTimeout(() => {
-          setIsAwaitingCode(false)
-          setShowVerificationPopup(false)
-          localStorage.setItem("token", data.token)
-          navigate("/profile-selector")
-        }, 1500)
+          setIsAwaitingCode(false);
+          setShowVerificationPopup(false);
+          localStorage.setItem("token", data.token);
+          navigate("/profile-selector");
+        }, 1500);
       } else {
-        setVerificationError(data.message || "Invalid verification code")
+        console.warn("❌ Código incorrecto:", data.message);
+        setVerificationError(data.message || "Invalid verification code");
       }
     } catch (error) {
-      setVerificationError("An error occurred. Please try again.")
+      setVerificationError("An error occurred. Please try again.");
     } finally {
-      setIsVerifying(false)
+      setIsVerifying(false);
     }
-  }
+  };
+  
 
   const handleResendCode = async () => {
     if (!canResend) return
@@ -555,6 +662,15 @@ const AuthenticationComponent = () => {
         <Components.SignUpContainer signinIn={signIn}>
           <Components.SignUpForm onSubmit={(e) => handleSubmit(e, false)}>
             <Components.Title>Create Account</Components.Title>
+
+            {/* Google Sign-Up Button */}
+            <GoogleButton type="button" onClick={handleGoogleSignIn}>
+              <FaGoogle />
+              Sign up with Google
+            </GoogleButton>
+
+            <OrDivider>or</OrDivider>
+
             <Components.InputContainer>
               <Components.Icon>
                 <FaUser />
@@ -633,7 +749,7 @@ const AuthenticationComponent = () => {
               <PhoneCodeField>{formData.phoneCode || "+61"}</PhoneCodeField>
               <PhoneNumberField
                 type="text"
-                placeholder="Phone Number"
+                placeholder="Number"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
@@ -676,6 +792,15 @@ const AuthenticationComponent = () => {
         <Components.SignInContainer signinIn={signIn}>
           <Components.SignInForm onSubmit={(e) => handleSubmit(e, true)}>
             <Components.Title>Sign In</Components.Title>
+
+            {/* Google Sign-In Button */}
+            <GoogleButton type="button" onClick={handleGoogleSignIn}>
+              <FaGoogle />
+              Sign in with Google
+            </GoogleButton>
+
+            <OrDivider>or</OrDivider>
+
             <Components.InputContainer>
               <Components.Icon>
                 <FaEnvelope />
