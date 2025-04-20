@@ -33,6 +33,9 @@ Para instalar y ejecutar el frontend de TubeKids en tu entorno local, sigue esto
 2. **Iniciar la Aplicación**:
    ```bash
        npm start
+## 🧩 Arquitectura Orientada a Servicios
+
+![Diagrama SOA](docs/arquitectura-soa.png)
 
 
 
