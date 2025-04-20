@@ -6,6 +6,8 @@ import styled from "styled-components"
 import { FaPhone, FaCalendarAlt, FaGlobe, FaMapMarkerAlt, FaUser, FaHashtag } from "react-icons/fa"
 import Swal from "sweetalert2"
 import { GraphQLClient, gql } from "graphql-request"
+import "./CompleteProfile.css";
+
 
 const client = new GraphQLClient("http://localhost:4000/graphql")
 const GET_COUNTRIES_QUERY = gql`
@@ -15,146 +17,6 @@ const GET_COUNTRIES_QUERY = gql`
       name
       phone_code
     }
-  }
-`
-
-const CompleteProfileContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f6f5f7;
-  padding: 20px;
-`
-
-const ProfileCard = styled.div`
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  width: 100%;
-  max-width: 500px;
-  padding: 40px;
-  text-align: center;
-`
-
-const Title = styled.h1`
-  font-weight: bold;
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 30px;
-`
-
-const Subtitle = styled.p`
-  color: #666;
-  font-size: 16px;
-  margin-bottom: 30px;
-  line-height: 1.5;
-`
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`
-
-const InputContainer = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-`
-
-const Icon = styled.span`
-  position: absolute;
-  left: 15px;
-  display: flex;
-  align-items: center;
-  color: #ccc;
-`
-
-const Input = styled.input`
-  width: 100%;
-  padding: 15px 15px 15px 45px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  &:focus {
-    outline: none;
-    border-color: #ff4b2b;
-    box-shadow: 0 0 0 2px rgba(255, 75, 43, 0.1);
-  }
-`
-
-const Select = styled.select`
-  width: 100%;
-  padding: 15px 15px 15px 45px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  font-size: 16px;
-  appearance: none;
-  background-position: right 15px top 50%;
-  background-size: 12px auto;
-  transition: all 0.3s ease;
-  &:focus {
-    outline: none;
-    border-color: #ff4b2b;
-    box-shadow: 0 0 0 2px rgba(255, 75, 43, 0.1);
-  }
-`
-
-const PhoneWrapper = styled.div`
-  display: flex;
-  gap: 10px;
-`
-
-const PhoneCode = styled.div`
-  width: 80px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`
-
-const Button = styled.button`
-  padding: 15px 0;
-  background-color: #ff4b2b;
-  color: white;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: bold;
-  text-transform: uppercase;
-  cursor: pointer;
-  border: none;
-  transition: all 0.3s ease;
-  margin-top: 10px;
-  &:hover {
-    background-color: #e04322;
-  }
-  &:active {
-    transform: scale(0.98);
-  }
-  &:focus {
-    outline: none;
-  }
-`
-
-const ProfileImage = styled.div`
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  svg {
-    font-size: 40px;
-    color: #ff4b2b;
   }
 `
 
@@ -317,73 +179,85 @@ const CompleteProfile = () => {
   }
 
   return (
-    <CompleteProfileContainer>
-      <ProfileCard>
-        <ProfileImage><FaUser /></ProfileImage>
-        <Title>Complete Your Profile</Title>
-        <Subtitle>Welcome{userName ? `, ${userName}` : ""}! Please provide a few more details to complete your profile.</Subtitle>
-
-        <Form onSubmit={handleSubmit}>
-          <InputContainer>
-            <Icon><FaGlobe /></Icon>
-            <Select name="country" value={formData.country} onChange={handleChange} required>
+    <div className="complete-profile-container">
+      <div className="profile-card">
+        <div className="profile-image"><FaUser /></div>
+        <h1 className="profile-title">Complete Your Profile</h1>
+        <p className="profile-subtitle">
+          Welcome{userName ? `, ${userName}` : ""}! Please provide a few more details to complete your profile.
+        </p>
+  
+        <form onSubmit={handleSubmit} className="profile-form">
+          <div className="input-container">
+            <span className="input-icon"><FaGlobe /></span>
+            <select
+              name="country"
+              value={formData.country}
+              onChange={handleChange}
+              required
+              className="profile-select"
+            >
               <option value="">Select your country</option>
               {countries.map((country) => (
                 <option key={country._id} value={country.name}>{country.name}</option>
               ))}
-            </Select>
-          </InputContainer>
-
-          <PhoneWrapper>
-            <PhoneCode>{formData.phoneCode || ""}</PhoneCode>
-            <Input
+            </select>
+          </div>
+  
+          <div className="phone-wrapper">
+            <div className="phone-code">{formData.phoneCode || ""}</div>
+            <input
               type="tel"
               name="phoneNumber"
               placeholder="Phone Number"
               value={formData.phoneNumber}
               onChange={handleChange}
               required
+              className="profile-input"
             />
-          </PhoneWrapper>
-
-          <InputContainer>
-            <Icon><FaMapMarkerAlt /></Icon>
-            <Input
+          </div>
+  
+          <div className="input-container">
+            <span className="input-icon"><FaMapMarkerAlt /></span>
+            <input
               type="text"
               name="address"
               placeholder="Address"
               value={formData.address}
               onChange={handleChange}
               required
+              className="profile-input"
             />
-          </InputContainer>
-
-          <InputContainer>
-            <Icon><FaCalendarAlt /></Icon>
-            <Input
+          </div>
+  
+          <div className="input-container">
+            <span className="input-icon"><FaCalendarAlt /></span>
+            <input
               type="date"
               name="birthDate"
               value={formData.birthDate}
               onChange={handleChange}
               required
+              className="profile-input"
             />
-          </InputContainer>
-
-          <InputContainer>
-            <Icon><FaHashtag /></Icon>
-            <Input
+          </div>
+  
+          <div className="input-container">
+            <span className="input-icon"><FaHashtag /></span>
+            <input
               type="number"
               name="age"
               placeholder="Age"
               value={formData.age}
               onChange={handleChange}
               required
+              className="profile-input"
             />
-          </InputContainer>
-
-          <InputContainer>
-            <Icon><FaHashtag /></Icon>
-            <Input
+          </div>
+  
+          <div className="input-container">
+            <span className="input-icon"><FaHashtag /></span>
+            <input
               type="text"
               name="pin"
               placeholder="PIN (6 digits)"
@@ -392,16 +266,18 @@ const CompleteProfile = () => {
               maxLength={6}
               pattern="\d{6}"
               required
+              className="profile-input"
             />
-          </InputContainer>
-
-          <Button type="submit" disabled={loading}>
+          </div>
+  
+          <button type="submit" className="profile-button" disabled={loading}>
             {loading ? "Processing..." : "Complete Profile"}
-          </Button>
-        </Form>
-      </ProfileCard>
-    </CompleteProfileContainer>
+          </button>
+        </form>
+      </div>
+    </div>
   )
+  
 }
 
 export default CompleteProfile

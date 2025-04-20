@@ -546,8 +546,86 @@ export const CloseButton = styled.button`
   color: #666;
   cursor: pointer;
   z-index: 10;
-  
+
   &:hover {
     color: #ff4b2b;
   }
 `;
+
+
+// Estilos para el contenedor de teléfono que mantiene el mismo diseño
+export const PhoneInputWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  gap: 10px;
+`
+
+export const PhoneCodeField = styled.div`
+  display: flex;
+  align-items: center;
+  width: 80px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0 10px;
+  color: #333;
+  background-color: #fff;
+`
+
+export const PhoneNumberField = styled(Input)`
+  flex: 1;
+`
+
+
+// Estilo para el botón de Google
+export const GoogleButton = styled.button`
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #fff;
+  color: #757575;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 70%;
+  margin: 10px auto;
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #f5f5f5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  svg {
+    color: #4285F4;
+    font-size: 20px;
+  }
+`
+
+export const OrDivider = styled.div`
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  color: #757575;
+  font-size: 14px;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+  }
+
+  &::before {
+    margin-right: 10px;
+  }
+
+  &::after {
+    margin-left: 10px;
+  }
+`

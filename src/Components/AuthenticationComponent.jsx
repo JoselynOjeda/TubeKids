@@ -6,141 +6,20 @@ import * as Components from "./AuthenticationStyles"
 import { FaEnvelope, FaLock, FaUser, FaIdBadge, FaGlobe, FaCalendarAlt, FaTimes, FaGoogle } from "react-icons/fa"
 import Swal from "sweetalert2"
 import { useNavigate } from "react-router-dom"
-
 import { GraphQLClient, gql } from "graphql-request"
 
-// Estilos adicionales para el popup
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`
+import {
+  GoogleButton,
+  OrDivider,
+  PhoneInputWrapper,
+  PhoneCodeField,
+  PhoneNumberField,
+  ModalOverlay,
+  ModalContainer,
+  CloseButton
+} from "./AuthenticationStyles"
 
-const slideIn = keyframes`
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`
 
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: ${fadeIn} 0.3s ease;
-`
-
-const ModalContainer = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  animation: ${slideIn} 0.3s ease;
-`
-
-const CloseButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #666;
-  cursor: pointer;
-  z-index: 10;
-  
-  &:hover {
-    color: #ff4b2b;
-  }
-`
-
-// Estilos para el contenedor de teléfono que mantiene el mismo diseño
-const PhoneInputWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  gap: 10px;
-`
-
-const PhoneCodeField = styled.div`
-  display: flex;
-  align-items: center;
-  width: 80px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 0 10px;
-  color: #333;
-  background-color: #fff;
-`
-
-const PhoneNumberField = styled(Components.Input)`
-  flex: 1;
-`
-
-// Estilo para el botón de Google
-const GoogleButton = styled.button`
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background-color: #fff;
-  color: #757575;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  padding: 12px 0;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  width: 70%;
-  margin: 10px auto;
-  transition: background-color 0.3s, box-shadow 0.3s;
-
-  &:hover {
-    background-color: #f5f5f5;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-
-  svg {
-    color: #4285F4;
-    font-size: 20px;
-  }
-`
-
-const OrDivider = styled.div`
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  margin: 15px 0;
-  color: #757575;
-  font-size: 14px;
-
-  &::before,
-  &::after {
-    content: "";
-    flex: 1;
-    border-bottom: 1px solid #ddd;
-  }
-
-  &::before {
-    margin-right: 10px;
-  }
-
-  &::after {
-    margin-left: 10px;
-  }
-`
 
 const client = new GraphQLClient("http://localhost:4000/graphql")
 const GET_COUNTRIES_QUERY = gql`
@@ -153,7 +32,6 @@ const GET_COUNTRIES_QUERY = gql`
     }
   }
 `
-
 const API_URL = "http://localhost:5000/api/users/"
 
 const initialState = {

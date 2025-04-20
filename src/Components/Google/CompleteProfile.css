@@ -36,4 +36,142 @@
       font-size: 14px;
     }
   }
+
+  /* Container */
+.complete-profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f6f5f7;
+  padding: 20px;
+}
+
+/* Card */
+.profile-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  text-align: center;
+}
+
+/* Title and Subtitle */
+.profile-title {
+  font-weight: bold;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.profile-subtitle {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+/* Form and Inputs */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  display: flex;
+  align-items: center;
+  color: #ccc;
+}
+
+.profile-input,
+.profile-select {
+  width: 100%;
+  padding: 15px 15px 15px 45px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.profile-input:focus,
+.profile-select:focus {
+  outline: none;
+  border-color: #ff4b2b;
+  box-shadow: 0 0 0 2px rgba(255, 75, 43, 0.1);
+}
+
+/* Phone group */
+.phone-wrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.phone-code {
+  width: 80px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Button */
+.profile-button {
+  padding: 15px 0;
+  background-color: #ff4b2b;
+  color: white;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.profile-button:hover {
+  background-color: #e04322;
+}
+
+.profile-button:active {
+  transform: scale(0.98);
+}
+
+.profile-button:focus {
+  outline: none;
+}
+
+/* Avatar */
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image svg {
+  font-size: 40px;
+  color: #ff4b2b;
+}
+
   
