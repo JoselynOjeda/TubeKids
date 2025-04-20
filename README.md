@@ -43,8 +43,7 @@ Este diagrama representa la distribución de servicios del proyecto KidsTube:
 - Servicios externos (OAuth, MailerSend, Twilio, YouTube)
 - MongoDB como base de datos compartida
 
-![Arquitectura SOA]([https://github.com/tu-usuario/tu-repo/blob/main/src/docs/Arquitectura%20Orientada%20a%20Servicios%20-%20Proyecto%20Web.drawio.png?raw=true](https://github.com/JoselynOjeda/TubeKids/blob/main/src/docs/Arquitectura%20Orientada%20a%20Servicios%20-%20Proyecto%20Web.drawio.png))
-
+![Arquitectura SOA](https://github.com/JoselynOjeda/TubeKids/blob/main/src/docs/Arquitectura%20Orientada%20a%20Servicios%20-%20Proyecto%20Web.drawio.png?raw=true)
 
 
 
