@@ -22,11 +22,11 @@ export const Container = styled.div`
   overflow: hidden;
   width: 1000px; // Keeping a reasonable width
   max-width: 100%; // Ensures it does not exceed the width of the viewport
-  min-height: 600px; // Increased height to fit all content
+  min-height: 700px; // Increased height to fit all content
   display: flex;
   justify-content: center;
   align-items: center; // Center items vertically and horizontally
-  padding: 50px; // Increased padding for more internal space
+  padding: 70px; // Increased padding for more internal space
 `
 
 export const SignUpContainer = styled.div`

@@ -120,7 +120,7 @@ const VideoManagement = () => {
   const [videoFormErrors, setVideoFormErrors] = useState({})
   const [playlistFormErrors, setPlaylistFormErrors] = useState({})
 
-  // Cargar datos iniciales (simulados)
+  // Cargar datos iniciales
   useEffect(() => {
     const fetchRestrictedProfiles = async () => {
       try {
