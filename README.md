@@ -33,6 +33,17 @@ Para instalar y ejecutar el frontend de TubeKids en tu entorno local, sigue esto
 2. **Iniciar la Aplicación**:
    ```bash
        npm start
+## 🧩 Arquitectura Orientada a Servicios
+
+Este diagrama representa la distribución de servicios del proyecto KidsTube:
+
+- Frontend en React
+- REST API para lógica compleja
+- GraphQL API para consultas
+- Servicios externos (OAuth, MailerSend, Twilio, YouTube)
+- MongoDB como base de datos compartida
+
+![Arquitectura SOA](https://github.com/JoselynOjeda/TubeKids/blob/main/src/docs/Arquitectura%20Orientada%20a%20Servicios%20-%20Proyecto%20Web.drawio.png?raw=true)
 
 
 
