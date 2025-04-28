@@ -7,6 +7,8 @@ import { FaEnvelope, FaLock, FaUser, FaIdBadge, FaGlobe, FaCalendarAlt, FaTimes,
 import Swal from "sweetalert2"
 import { useNavigate } from "react-router-dom"
 import { GraphQLClient, gql } from "graphql-request"
+import axios from "axios";
+
 
 import {
   GoogleButton,
@@ -195,14 +197,18 @@ const AuthenticationComponent = () => {
     const fetchCountries = async () => {
       try {
         const data = await client.request(GET_COUNTRIES_QUERY)
-        setCountries(data.getCountries)
+        const sortedCountries = data.getCountries.sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        });
+        setCountries(sortedCountries);
       } catch (error) {
         console.error("Error fetching countries:", error)
       }
-    }
-
-    fetchCountries()
-  }, [])
+    };
+  
+    fetchCountries();
+  }, []);
+  
 
   useEffect(() => {
     if (!isAwaitingCode || timerRef.current <= 0) return
@@ -306,36 +312,31 @@ const AuthenticationComponent = () => {
   }
 
   const handleSignup = async () => {
-    if (!validateForm()) return
+    if (!validateForm()) return;
+  
     try {
       const response = await fetch(`${API_URL}signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-
+      });
+  
+      const data = await response.json();
+  
       if (response.ok) {
-        if (data.requiresVerification) {
-          // Si se requiere verificación, mostrar el popup
-          setPendingUserId(data.userId)
-          setIsAwaitingCode(true)
-          setResendTimer(60)
-          setCanResend(false)
-          setShowVerificationPopup(true) // Mostrar el popup
-        } else {
-          Swal.fire("Success!", data.message || "Please check your email to verify your account.", "success")
-          resetForm()
-          toggle(true) // Change to login screen
-        }
+        Swal.fire("Success!", "Account created. Please check your email to verify your account.", "success");
+        resetForm();
+        toggle(true); // Cambia a login
       } else {
-        throw new Error(data.message || "Failed to register")
+        throw new Error(data.message || "Failed to register");
       }
     } catch (error) {
-      Swal.fire("Error!", error.message, "error")
+      Swal.fire("Error!", error.message, "error");
     }
-  }
+  };
+  
+  
+  
 
   const handleLogin = async () => {
     if (!signInData.email || !signInData.password) {
@@ -374,6 +375,47 @@ const AuthenticationComponent = () => {
       Swal.fire("Error!", error.message, "error")
     }
   }
+
+  const sendEmailVerificationFromFrontend = async (toEmail, token) => {
+    try {
+      const response = await axios.post(
+        "https://api.mailersend.com/v1/email",
+        {
+          from: {
+            email: "noreply@test-zxk54v8zde6ljy6v.mlsender.net",
+            name: "TubeKids"
+          },
+          to: [{ email: toEmail, name: "New User" }],
+          subject: "Verify your email",
+          html: `
+            <p>Hello! Please verify your email address by clicking the link below:</p>
+            <a href="http://localhost:3000/verify-email/${encodeURIComponent(token)}">Verify Email</a>
+          `
+        },
+        {
+          headers: {
+            Authorization: `Bearer mlsn.d8b5be33cf127e4c182a2d79d0dbd941b2d697da50b28e1eb1b049244e048178`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      console.log("✅ Email sent successfully:", response.data);
+      return true;
+    } catch (error) {
+      console.error("❌ Error sending email from frontend:", error.response?.data || error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Email sending failed!',
+        text: error.response?.data?.message || error.message,
+        confirmButtonColor: "#ff4b2b"
+      });
+      return false;
+    }
+  };
+  
+  
+  
+  
 
   const handleSubmit = (event, isSignIn = false) => {
     event.preventDefault()

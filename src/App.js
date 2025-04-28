@@ -4,6 +4,7 @@ import ProfileSelector from './Components/Tube/Profile-Selector'; // Ensure this
 import Playlist from "./Components/Tube/Playlist";
 import VideoManagement from "./Components/Tube/VideoManagement";
 import CompleteProfile from "./Components/Google/CompleteProfile";
+import VerifyEmailPage from './Pages/VerifyEmailPage';
 
 function App() {
     return (
@@ -15,6 +16,8 @@ function App() {
                     <Route path="/playlist" element={<Playlist />} />
                     <Route path="/video-management" element={<VideoManagement />} />
                     <Route path="/complete-profile" element={<CompleteProfile />} />
+                    <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+                    <Route path="/login" element={<AuthenticationComponent />} />
                 </Routes>
             </div>
         </Router>
